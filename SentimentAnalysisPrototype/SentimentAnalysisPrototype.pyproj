@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b0772473-d6c0-441c-9763-73957c2f5441</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>SentimentAnalysisPrototype.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -21,7 +21,25 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CustomTableModel.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="getData.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="getResults.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="main.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MyWidget.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SentimentAnalysisPrototype.py" />
+    <Compile Include="UI.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
