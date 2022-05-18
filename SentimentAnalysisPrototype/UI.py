@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from PySide6.QtCore import Qt
 from MyWidget import MyWidget
 from getResults import getResults
+from models import models
 class Main(QMainWindow):
 
     def update (self):
@@ -27,6 +28,9 @@ class Main(QMainWindow):
     def __init__(self):
         #Initializes window
         super(Main, self).__init__()
+
+        #Intializes model
+        self.model = models()
        
         #Embedded CSS Styling
         #Add group tag in widget constructor eg self.boldTextLbl = QLabel(self, objectName="bold")
@@ -240,6 +244,7 @@ class Main(QMainWindow):
             elif self.timePeriod.currentText() == "Weeks":
                 dateGap = timedelta(weeks=timeNum)
             elif self.timePeriod.currentText() == "Months":
+                #Date math only goes up to weeks so used multiplication workaround
                 timeNum  = timeNum*4
                 dateGap = timedelta(weeks=timeNum)
             elif self.timePeriod.currentText() == "Years":
@@ -251,9 +256,12 @@ class Main(QMainWindow):
             if endDate < fromDate:
                 self.warningLbl.setText("The starting date cannot be later than the end date")
             #TODO: Data processing here? convert Include/Exclude to one variable, 
-            #     Model (Can get text or index)  , File tuple    ,start date,end date, Include filter? (True/False)     , Exclude filter? (True/False)    , filter words          
             else:
                 self.warningLbl.setText(" ")
+                #Model (Can get text or index)  , File tuple    ,start date,end date, Include filter? (True/False)     , Exclude filter? (True/False)    , filter words          
                 print(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterRadioWhite.isChecked(), self.filterRadioBlack.isChecked(),  self.filterText.toPlainText())
-        except AttributeError:
+                self.model.run(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterRadioWhite.isChecked(), self.filterRadioBlack.isChecked(),  self.filterText.toPlainText())
+
+        except AttributeError as e:
+            print(e)
             self.warningLbl.setText("Please select a dataset to use")
