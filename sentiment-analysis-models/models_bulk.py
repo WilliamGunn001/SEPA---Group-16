@@ -66,34 +66,29 @@ def convert_scale(result):
 # Result array
 sentiment_results = []
 
-#Here are some choices for models
-#1. nlptown/bert-base-multilingual-uncased-sentiment
-#2. siebert/sentiment-roberta-large-english
-#3. finiteautomata/bertweet-base-sentiment-analysis
-#4. cardiffnlp/twitter-roberta-base-sentiment-latest
-#5. Seethal/sentiment_analysis_generic_dataset
-#6. DaNLP/da-bert-tone-sentiment-polarity
-model="nlptown/bert-base-multilingual-uncased-sentiment"
+# run bulk models
+models_list = ["nlptown/bert-base-multilingual-uncased-sentiment", "siebert/sentiment-roberta-large-english", "finiteautomata/bertweet-base-sentiment-analysis", "cardiffnlp/twitter-roberta-base-sentiment-latest", "Seethal/sentiment_analysis_generic_dataset", "DaNLP/da-bert-tone-sentiment-polarity"]
 
-#conduct sentiment analysis model
-sentiment_analysis = pipeline("sentiment-analysis",model=model)
+for model in models_list:
 
-if qty == "all":
-    for tweet in twitter_data:
-        result = sentiment_analysis(tweet["Comments"])
-        result[0]["twitter_id"] = tweet["TweetID"]
-        new_result = convert_scale(result[0])
-        print(new_result)
-        sentiment_results.append(new_result)
-else:
-    qty = int(qty)
-    for i in range(0, qty):
-        tweet = twitter_data[i]
-        result = sentiment_analysis(tweet["Comments"])
-        result[0]["twitter_id"] = tweet["TweetID"]
-        new_result = convert_scale(result[0])
-        print(new_result)
-        sentiment_results.append(new_result)
+    sentiment_analysis = pipeline("sentiment-analysis",model=model)
+    
+    if qty == "all":
+        for tweet in twitter_data:
+            result = sentiment_analysis(tweet["Comments"])
+            result[0]["twitter_id"] = tweet["TweetID"]
+            new_result = convert_scale(result[0])
+            print(new_result)
+            sentiment_results.append(new_result)
+    else:
+        qty = int(qty)
+        for i in range(0, qty):
+            tweet = twitter_data[i]
+            result = sentiment_analysis(tweet["Comments"])
+            result[0]["twitter_id"] = tweet["TweetID"]
+            new_result = convert_scale(result[0])
+            print(new_result)
+            sentiment_results.append(new_result)
 
 print(sentiment_results) # print the sentiment result
 
@@ -102,3 +97,9 @@ with open("output.csv","w",newline="") as f:  # write to csv file
     cw = csv.DictWriter(f,title,delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
     cw.writeheader()
     cw.writerows(sentiment_results)
+
+# # Record time of runs
+# result = time.time() - start_time
+# print("--- %s seconds ---" % result) 
+# with open("result.csv", 'a') as fd:
+#     fd.write(f"{model},{qty},{result}\n") # write to a csv file to analyse 
