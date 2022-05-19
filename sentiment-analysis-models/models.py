@@ -19,7 +19,7 @@ qty = "all"
 column_name = ["Scale", "TweetID", "Date", "Query", "User", "Comments"]
 
 #read in csv file 
-df = pd.read_csv("newoutput.csv", names=column_name, encoding='latin-1')
+df = pd.read_csv("twitterdata.csv", names=column_name, encoding='latin-1')
 
 
 twitter_data = df[['TweetID', 'Comments']].to_dict(orient='records')
