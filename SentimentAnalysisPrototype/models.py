@@ -18,6 +18,44 @@ class models(object):
 		#set qty to 100 --- grab 100 data from csv file (set to "all" to model entire dataset)
 		self.qty = "all" 
 
+		# Labels 
+		self.labels = {
+			"negative": ["negative","1 star","2 stars","neg","label_0"],
+			"neutral": ["neutral","3 stars","neu","label_1"],
+			"positive": ["positive","4 stars","5 stars","pos","label_2"]
+		}
+
+	def convert_scale(self, result):
+		label = result["label"].lower()
+		score = result["score"]
+
+		if "star" in label:
+			scale = int(label[0])
+			if scale <= 2:
+				result["label"] = "Negative"
+			elif scale >=4:
+				result["label"] = "Positive"
+			else:
+				result["label"] = "Neutral"
+			result["scale"] = scale
+		elif label in self.labels["negative"]:
+			result["label"] = "Negative"
+			if(score >= 0.7):
+				result["scale"] = 1
+			else:
+				result["scale"] = 2
+		elif label in self.labels["neutral"]:
+			result["label"] = "Neutral"
+			result["scale"] = 3
+		elif label in self.labels["positive"]:
+			result["label"] = "Positive"
+			if(score >= 0.7):
+				result["scale"] = 5
+			else:
+				result["scale"] = 4
+
+		return result
+
 	def run(self, nlpModel, fileDeets, fromDate, endDate, include, exclude, filter):
 		print("Working", nlpModel)
 		#Here are some choices for models
@@ -58,6 +96,7 @@ class models(object):
 
 		# Accuracy testing
 		sentiment_results = []
+		
 
 		if self.qty == "all":
 			#Does filter need to be applied?
@@ -95,21 +134,25 @@ class models(object):
 
 				result = sentiment_analysis(tweet["Comments"])
 				result[0]["twitter_id"] = tweet["TweetID"]
-				print(result[0])
-				sentiment_results.append(result[0])
+				result[0]["date"] = tweet["Date"]
+				new_result = self.convert_scale(result[0])
+				print(new_result)
+				sentiment_results.append(new_result)
 		else:
 			qty = int(qty)
 			for i in range(0, qty):
 				tweet = twitter_data[i]
 				result = sentiment_analysis(tweet["Comments"])
 				result[0]["twitter_id"] = tweet["TweetID"]
-				print(result[0])
-				sentiment_results.append(result[0])
+				result[0]["date"] = tweet["Date"]
+				new_result = self.convert_scale(result[0])
+				print(new_result)
+				sentiment_results.append(new_result)
 
 		print(sentiment_results) # print the sentiment result
 
 		with open("output.csv","w",newline="") as f:  # write to csv file
-			title = "label,score,twitter_id, date".split(",") # quick hack
+			title = "label,score,twitter_id, date, scale".split(",") # quick hack
 			cw = csv.DictWriter(f,title,delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 			cw.writeheader()
 			cw.writerows(sentiment_results)
