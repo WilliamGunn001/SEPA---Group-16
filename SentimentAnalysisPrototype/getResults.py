@@ -13,8 +13,8 @@ class getResults(object):
         df = pd.read_csv(fname)
         # Remove wrong magnitudes
 
-        dates = df["Date"].apply(lambda x: self.date(x))
-        sentiment= df["Sentiment_Score"]
+        dates = df["date"].apply(lambda x: self.date(x))
+        sentiment= df["scale"]
 
         # My local timezone
 
@@ -23,6 +23,7 @@ class getResults(object):
         return dates, sentiment
   
     def date(self,utc):
+        ##BUG HHERE
             utc_fmt = "MM-dd-yyyy"
             timezone = QTimeZone(b"Australia/Sydney")
 
