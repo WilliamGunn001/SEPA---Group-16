@@ -8,6 +8,8 @@ from ast import literal_eval
 import time
 import json
 from datetime import datetime
+from dateutil.parser import parse
+from dateutil.tz import gettz
 
 #Converted to object but dont need to
 class models(object):
@@ -57,7 +59,7 @@ class models(object):
 		return result
 
 	def run(self, nlpModel, fileDeets, fromDate, endDate, include, exclude, filter):
-		print("Working", nlpModel)
+		print("Working pls w8. Loading ", nlpModel)
 		#Here are some choices for models
 		#1. nlptown/bert-base-multilingual-uncased-sentiment
 		#2. siebert/sentiment-roberta-large-english
@@ -70,7 +72,7 @@ class models(object):
 		if nlpModel == "Nlptown":
 			model = "nlptown/bert-base-multilingual-uncased-sentiment"
 		elif nlpModel == "Siebert":
-			model = ""
+			model = "siebert/sentiment-roberta-large-english"
 		elif nlpModel == "Finiteautomata":
 			model = "finiteautomata/bertweet-base-sentiment-analysis"
 		elif nlpModel == "Cardiffnlp":
@@ -99,6 +101,9 @@ class models(object):
 		
 
 		if self.qty == "all":
+			#May need to expand timezone information
+			tzInfo = {"PDT": gettz("US/Pacific")}
+
 			#Does filter need to be applied?
 			filterEnabled = False
 			if filter != "":
@@ -110,8 +115,8 @@ class models(object):
 				filterEnabled = True
 			for tweet in twitter_data:
 				#Converts tweet date to date object for comparison
-				#This will need to be changed to be more robust but works with current tweet time formatting
-				date = datetime.strptime(tweet["Date"], "%a %b %d %H:%M:%S PDT %Y").date()
+				dt = parse(tweet["Date"], tzinfos=tzInfo)
+				date = dt.date()
 
 				#Checks if tweet is in date range
 				#could potentially make this more efficient if data was sorted by time/date
@@ -134,7 +139,7 @@ class models(object):
 
 				result = sentiment_analysis(tweet["Comments"])
 				result[0]["twitter_id"] = tweet["TweetID"]
-				result[0]["date"] = tweet["Date"]
+				result[0]["date"] = dt
 				new_result = self.convert_scale(result[0])
 				print(new_result)
 				sentiment_results.append(new_result)
@@ -144,7 +149,7 @@ class models(object):
 				tweet = twitter_data[i]
 				result = sentiment_analysis(tweet["Comments"])
 				result[0]["twitter_id"] = tweet["TweetID"]
-				result[0]["date"] = tweet["Date"]
+				result[0]["date"] = dt
 				new_result = self.convert_scale(result[0])
 				print(new_result)
 				sentiment_results.append(new_result)
@@ -152,7 +157,7 @@ class models(object):
 		print(sentiment_results) # print the sentiment result
 
 		with open("output.csv","w",newline="") as f:  # write to csv file
-			title = "label,score,twitter_id, date, scale".split(",") # quick hack
+			title = "label,score,twitter_id,date,scale".split(",") # quick hack
 			cw = csv.DictWriter(f,title,delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 			cw.writeheader()
 			cw.writerows(sentiment_results)

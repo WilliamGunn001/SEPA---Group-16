@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt
 from MyWidget import MyWidget
 from getResults import getResults
 from models import models
+
 class Main(QMainWindow):
 
     def update (self):
@@ -15,7 +16,7 @@ class Main(QMainWindow):
         
     def showResult(self):
         getdata=getResults()
-        data = getdata.read_data("dummydata.csv")
+        data = getdata.read_data("output.csv")
 
         wid=MyWidget(data)
         wid.setMinimumWidth(600)
