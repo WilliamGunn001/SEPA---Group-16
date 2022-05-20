@@ -134,7 +134,6 @@ class models(object):
 
 				result = sentiment_analysis(tweet["Comments"])
 				result[0]["twitter_id"] = tweet["TweetID"]
-				result[0]["date"] = tweet["Date"]
 				new_result = self.convert_scale(result[0])
 				print(new_result)
 				sentiment_results.append(new_result)
@@ -144,7 +143,6 @@ class models(object):
 				tweet = twitter_data[i]
 				result = sentiment_analysis(tweet["Comments"])
 				result[0]["twitter_id"] = tweet["TweetID"]
-				result[0]["date"] = tweet["Date"]
 				new_result = self.convert_scale(result[0])
 				print(new_result)
 				sentiment_results.append(new_result)
@@ -152,7 +150,7 @@ class models(object):
 		print(sentiment_results) # print the sentiment result
 
 		with open("output.csv","w",newline="") as f:  # write to csv file
-			title = "label,score,twitter_id, date, scale".split(",") # quick hack
+			title = "label,score,twitter_id,scale".split(",") # quick hack
 			cw = csv.DictWriter(f,title,delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 			cw.writeheader()
 			cw.writerows(sentiment_results)
