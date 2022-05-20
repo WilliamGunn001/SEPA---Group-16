@@ -132,7 +132,8 @@ class MyWidget(QWidget):
         # Create QLineSeries
         self.series = QLineSeries()
         self.series.setName(name)
-
+        date=None
+        a=None
         # Filling QLineSeries
         for i in range(self.model.rowCount()):
             # Getting the data
@@ -145,6 +146,11 @@ class MyWidget(QWidget):
 
             if x > 0 and y > 0:
                 self.series.append(x, y)
+        
+           
+                    
+       
+         
         
         self.chart.addSeries(self.series)
         

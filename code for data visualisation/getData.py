@@ -7,10 +7,11 @@ from PySide6.QtCore import QDateTime, QTimeZone
 from Window import Window
 from PySide6.QtWidgets import QApplication 
 def date(utc):
-        utc_fmt = "ddd MMM d HH:mm:ss yyyy"
-        timezone = QTimeZone(b"Australia/Sydney")
+        d=utc[0:10]
+        utc_fmt = "yyyy-MM-dd"
 
-        new_date = QDateTime().fromString(utc, utc_fmt)
+        new_date = QDateTime().fromString(d, utc_fmt)
+        tes=new_date.toString()
         return new_date    
 class getData(object):
     """description of class"""
@@ -20,10 +21,10 @@ class getData(object):
         # Read the CSV content
         df = pd.read_csv(fname)
         # Remove wrong magnitudes
-
+        df['date'] = df['date'].str[:10]
+        df= df.groupby('date', as_index=False).mean()
         dates = df["date"].apply(lambda x: date(x))
-        sentiment= df["scale"]
-
+        sentiment=df["scale"]
         # My local timezone
 
         # Get timestamp transformed to our timezone
@@ -34,7 +35,7 @@ class getData(object):
       #  options = argparse.ArgumentParser()
         #options.add_argument("-f", "--file", type=str, required=True)
        # args = options.parse_args()
-        data = read_data("message.csv")
+        data = read_data("output.csv")
 
         # Qt Application
         app = QApplication(sys.argv)

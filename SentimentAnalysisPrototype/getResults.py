@@ -11,23 +11,26 @@ from dateutil.tz import gettz
 class getResults(object):
     """description of class"""
 
+    def date(utc):
+        d=utc[0:10]
+        utc_fmt = "yyyy-MM-dd"
+
+        new_date = QDateTime().fromString(d, utc_fmt)
+        tes=new_date.toString()
+        return new_date    
+
+
    
-    def read_data(self,fname):
+    def read_data(fname):
         # Read the CSV content
         df = pd.read_csv(fname)
         # Remove wrong magnitudes
-
+        df['date'] = df['date'].str[:10]
+        df= df.groupby('date', as_index=False).mean()
+        dates = df["date"].apply(lambda x: date(x))
+        sentiment=df["scale"]
         # My local timezone
-        local_tz = gettz()
+
         # Get timestamp transformed to our timezone
-        dates = df["date"].apply(lambda x: self.date(x, local_tz))
-        sentiment= df["scale"]
 
         return dates, sentiment
-  
-    def date(self,utc,local_tz):
-        date = parse(utc)
-        new_date = date.astimezone(local_tz)
-        #print(new_date)
-        
-        return new_date

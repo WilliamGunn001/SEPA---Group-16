@@ -8,6 +8,13 @@ class CustomTableModel(QAbstractTableModel):
         self.load_data(data)
 
     def load_data(self, data):
+
+
+
+                
+
+
+
         self.input_dates = data[0].values
         self.input_sent = data[1].values
 
