@@ -1,5 +1,5 @@
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QApplication,QSizePolicy, QMainWindow, QSpacerItem,QFileDialog, QLineEdit, QLabel, QPushButton, QBoxLayout, QVBoxLayout, QHBoxLayout, QWidget, QComboBox, QRadioButton, QTextEdit, QSpinBox
+from PySide6.QtWidgets import QApplication,QSizePolicy, QMainWindow, QSpacerItem,QFileDialog, QLineEdit, QLabel, QPushButton, QBoxLayout, QVBoxLayout, QHBoxLayout, QWidget, QComboBox, QCheckBox, QTextEdit, QSpinBox
 import sys
 import os
 from datetime import datetime, timedelta
@@ -7,13 +7,9 @@ from PySide6.QtCore import Qt
 from MyWidget import MyWidget
 from getResults import getResults
 from models import models
+import shutil
 
-class Main(QMainWindow):
-
-    def update (self):
-        self.generateBtn.clicked.connect(self.showResult)
-   
-        
+class Main(QMainWindow): 
     def showResult(self):
         getdata=getResults()
         data = getdata.read_data("output.csv")
@@ -93,7 +89,7 @@ class Main(QMainWindow):
 
         self.timeText = QSpinBox(self)
         self.timeText.setMaximum(999)
-        self.timeText.setMinimumWidth(140)
+        self.timeText.setMinimumWidth(110)
         self.timeText.setAlignment(Qt.AlignCenter)
 
         self.timePeriod = QComboBox(self)
@@ -105,17 +101,17 @@ class Main(QMainWindow):
         self.date1Lbl.setMinimumSize(110, 40)
 
         self.date1Text = QLineEdit(self)
-        #self.date1Text.resize(200, 30)
         self.date1Text.setInputMask("99/99/99;")
         self.date1Text.setText("01/01/22;")
+        self.date1Text.setMaximumWidth(110)
 
         self.date2Lbl = QLabel(self)
         self.date2Lbl.setText('to')
 
         self.date2Text = QLineEdit(self)
-        #self.date2Text.resize(200, 30)
         self.date2Text.setInputMask("99/99/99;")
         self.date2Text.setText("01/05/22;")
+        self.date2Text.setMaximumWidth(95)
 
         self.filterLbl = QLabel(self, objectName="rowLbl")
         self.filterLbl.setText('Filter Words')
@@ -123,18 +119,24 @@ class Main(QMainWindow):
 
         self.filterLblWhite = QLabel(self)
         self.filterLblWhite.setText('Include')
+        self.filterLblWhite.setAlignment(Qt.AlignVCenter)
 
         self.filterLblBlack = QLabel(self)
         self.filterLblBlack.setText('Exclude')
+        self.filterLblBlack.setAlignment(Qt.AlignVCenter)
 
-        self.filterRadioWhite = QRadioButton(self)
-        self.filterRadioWhite.setChecked(True)
+        self.filterCheckInclude = QCheckBox(self)
 
-        self.filterRadioBlack = QRadioButton(self)
+        self.filterCheckExclude = QCheckBox(self)
+        self.filterCheckExclude.setContentsMargins(0,0,0,0)
 
-        self.filterText = QTextEdit(self)
-        self.filterText.setMaximumWidth(150)
-        self.filterText.setPlaceholderText("Seperate, different, words, using, commas")
+        self.includeText = QTextEdit(self)
+        self.includeText.setPlaceholderText("Seperate, different, words, using, commas,                       Comment must include one of these words")
+        self.includeText.setMaximumSize(160, 80)
+
+        self.excludeText = QTextEdit(self)
+        self.excludeText.setPlaceholderText("Comment cannot include any of these words")
+        self.excludeText.setMaximumSize(160, 80)
 
         self.warningLbl = QLabel(self, objectName="warningLbl")
         self.warningLbl.setText(" ")
@@ -147,7 +149,7 @@ class Main(QMainWindow):
 
         self.downloadBtn = QPushButton(self, objectName="submit")
         self.downloadBtn.setText("Download Results")
-        #self.downloadBtn.clicked.connect()
+        self.downloadBtn.clicked.connect(self.saveFile)
 
         #Layout setup
         self.setCentralWidget(widget)        
@@ -172,6 +174,7 @@ class Main(QMainWindow):
         self.row3.addWidget(self.timeLbl)
         self.row3.addWidget(self.timeText)
         self.row3.addWidget(self.timePeriod)
+        self.row3.addStretch()
         
         #Fourth row date range
         self.row4 = QHBoxLayout()
@@ -179,22 +182,28 @@ class Main(QMainWindow):
         self.row4.addWidget(self.date1Text)
         self.row4.addWidget(self.date2Lbl)
         self.row4.addWidget(self.date2Text)
+        self.row4.addStretch()
 
         #Fifth row filter
         self.row5 = QHBoxLayout()
         self.row5.addWidget(self.filterLbl)
 
-        self.radio = QVBoxLayout()
-        self.radio.addWidget(self.filterRadioWhite)
-        self.radio.addWidget(self.filterRadioBlack)
-        self.row5.addLayout(self.radio)
+        self.checkboxes = QVBoxLayout()
+        self.checkInclude = QHBoxLayout()
+        self.checkInclude.addWidget(self.filterCheckInclude)
+        self.checkInclude.addWidget(self.filterLblWhite)
+        self.checkInclude.addWidget(self.includeText)
+        self.checkInclude.addStretch()
+        self.checkboxes.addLayout(self.checkInclude)
 
-        self.radioLbls = QVBoxLayout()
-        self.radioLbls.addWidget(self.filterLblWhite)
-        self.radioLbls.addWidget(self.filterLblBlack)
-        self.row5.addLayout(self.radioLbls)
+        self.checkExclude = QHBoxLayout()
+        self.checkExclude.addWidget(self.filterCheckExclude)
+        self.checkExclude.addWidget(self.filterLblBlack)
+        self.checkExclude.addWidget(self.excludeText)
+        self.checkExclude.addStretch()
+        self.checkboxes.addLayout(self.checkExclude)
 
-        self.row5.addWidget(self.filterText)
+        self.row5.addLayout(self.checkboxes)
 
         #Sixth row warning
         self.row6 = QHBoxLayout()
@@ -230,12 +239,38 @@ class Main(QMainWindow):
         self.fileLbl.setText(self.fileDeets[0])
         self.fileLbl.adjustSize()
 
+    def saveFile(self):
+        local = os.getcwd()
+        fileDeets = QFileDialog()
+        fileDeets.setFileMode(QFileDialog.AnyFile);
+        dest = fileDeets.getSaveFileName(
+            parent = self,
+            caption = 'Save File...',
+            dir = local)
+        shutil.copy(local + "\\output.csv", dest[0])
+
     def generate(self):
         #If time needed, remove .date()
         #Gets the calender dates
         if self.timeText.text() == "0":
-            fromDate = datetime.strptime(self.date1Text.text(), "%d/%m/%y").date()
-            endDate = datetime.strptime(self.date2Text.text(), "%d/%m/%y").date()
+            if len(self.date1Text.text()) < 8:
+                self.warningLbl.setText("Please include leading 0s in the dates")
+            elif int(self.date1Text.text()[0:2]) > 31 or int(self.date1Text.text()[0:2]) == 00:
+                self.warningLbl.setText("Invalid day for starting date")
+                return False
+            elif int(self.date1Text.text()[3:5]) > 12 or int(self.date1Text.text()[3:5]) == 00:
+                self.warningLbl.setText("Invalid day for starting month")
+                return False
+            elif int(self.date2Text.text()[0:2]) > 31 or int(self.date2Text.text()[0:2]) == 00:
+                self.warningLbl.setText("Invalid day for ending date")
+                return False
+            elif int(self.date2Text.text()[3:5]) > 12 or int(self.date2Text.text()[3:5]) == 00:
+                self.warningLbl.setText("Invalid day for ending month")
+                return False
+            #Extra cases for feb
+            else:
+                fromDate = datetime.strptime(self.date1Text.text(), "%d/%m/%y").date()
+                endDate = datetime.strptime(self.date2Text.text(), "%d/%m/%y").date()
         #Or converts time period to a date
         else:
             endDate = datetime.today().date()
@@ -259,10 +294,14 @@ class Main(QMainWindow):
             #TODO: Data processing here? convert Include/Exclude to one variable, 
             else:
                 self.warningLbl.setText(" ")
-                #Model (Can get text or index)  , File tuple    ,start date,end date, Include filter? (True/False)     , Exclude filter? (True/False)    , filter words          
-                print(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterRadioWhite.isChecked(), self.filterRadioBlack.isChecked(),  self.filterText.toPlainText())
-                self.model.run(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterRadioWhite.isChecked(), self.filterRadioBlack.isChecked(),  self.filterText.toPlainText())
+                #Model (Can get text or index)  , File tuple    ,start date,end date, Include filter? (True/False)     , Exclude filter? (True/False)    , include words,   exclude words       
+                print(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterCheckInclude.isChecked(), self.filterCheckExclude.isChecked(),  self.includeText.toPlainText(), self.excludeText.toPlainText())
+                self.model.run(self.nlpModel.currentText(), self.fileDeets, fromDate, endDate, self.filterCheckInclude.isChecked(), self.filterCheckExclude.isChecked(),  self.includeText.toPlainText(),self.excludeText.toPlainText())
+                self.showResult()
 
         except AttributeError as e:
             print(e)
             self.warningLbl.setText("Please select a dataset to use")
+
+
+

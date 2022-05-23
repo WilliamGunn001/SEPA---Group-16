@@ -11,7 +11,7 @@ from dateutil.tz import gettz
 class getResults(object):
     """description of class"""
 
-    def date(utc):
+    def date(self, utc):
         d=utc[0:10]
         utc_fmt = "yyyy-MM-dd"
 
@@ -21,13 +21,13 @@ class getResults(object):
 
 
    
-    def read_data(fname):
+    def read_data(self, fname):
         # Read the CSV content
         df = pd.read_csv(fname)
         # Remove wrong magnitudes
         df['date'] = df['date'].str[:10]
         df= df.groupby('date', as_index=False).mean()
-        dates = df["date"].apply(lambda x: date(x))
+        dates = df["date"].apply(lambda x: self.date(x))
         sentiment=df["scale"]
         # My local timezone
 

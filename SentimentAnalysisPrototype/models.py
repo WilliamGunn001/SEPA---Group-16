@@ -58,7 +58,7 @@ class models(object):
 
 		return result
 
-	def run(self, nlpModel, fileDeets, fromDate, endDate, include, exclude, filter):
+	def run(self, nlpModel, fileDeets, fromDate, endDate, include, exclude, includeFilter, excludeFilter):
 		print("Working pls w8. Loading ", nlpModel)
 		#Here are some choices for models
 		#1. nlptown/bert-base-multilingual-uncased-sentiment
@@ -105,14 +105,22 @@ class models(object):
 			tzInfo = {"PDT": gettz("US/Pacific")}
 
 			#Does filter need to be applied?
-			filterEnabled = False
-			if filter != "":
-				wordProcessing = filter.split(",")
-				filterWords = []
-				#Makes list 'whole words' (surrounded by whitespace) case sensitive?
+			includeFilterEnabled = False
+			if includeFilter != "" and include:
+				wordProcessing = includeFilter.split(",")
+				includeWords = []
+				#Makes list 'whole words' (surrounded by whitespace), could add case sensitive?
 				for w in wordProcessing:
-					filterWords.append(" " + w.strip() + " ")
-				filterEnabled = True
+					includeWords.append(" " + w.strip().lower() + " ")
+				includeFilterEnabled = True
+			#Does filter need to be applied?
+			excludeFilterEnabled = False
+			if excludeFilter != "" and exclude:
+				wordProcessing = excludeFilter.split(",")
+				excludeWords = []
+				for w in wordProcessing:
+					excludeWords.append(" " + w.strip().lower() + " ")
+				excludeFilterEnabled = True
 			for tweet in twitter_data:
 				#Converts tweet date to date object for comparison
 				dt = parse(tweet["Date"], tzinfos=tzInfo)
@@ -125,16 +133,15 @@ class models(object):
 					continue
 
 				#Filters tweets by words
-				if filterEnabled:
-					if exclude:
-						if any(word in tweet["Comments"] for word in filterWords):
-							print (tweet["TweetID"],tweet["Comments"], " filtered")
-							continue
-					elif include:
-						#Possible sub selection - Must include all words or any words?
-						if not any(word in tweet["Comments"] for word in filterWords):
-							print (tweet["TweetID"],tweet["Comments"], " filtered")
-							continue
+				if excludeFilterEnabled:
+					#Possible sub selection - Must include all words or any words?
+					if any(word in tweet["Comments"].lower() for word in excludeWords):
+						print (tweet["TweetID"],tweet["Comments"], " filtered")
+						continue
+				if includeFilterEnabled:
+					if not any(word in tweet["Comments"].lower() for word in includeWords):
+						print (tweet["TweetID"],tweet["Comments"], " filtered")
+						continue
 				#print (tweet["TweetID"],tweet["Comments"], " not filtered")
 
 				result = sentiment_analysis(tweet["Comments"])
