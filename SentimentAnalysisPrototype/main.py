@@ -14,6 +14,6 @@ def main():
         win.update()
         sys.exit(app.exec())
     
-
+        
 if __name__ == "__main__":
     main()

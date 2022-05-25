@@ -10,7 +10,8 @@ from dateutil.tz import gettz
 
 class getResults(object):
     """description of class"""
-
+    def __init__(self):
+        pass
     def date(self, utc):
         d=utc[0:10]
         utc_fmt = "yyyy-MM-dd"
@@ -28,7 +29,7 @@ class getResults(object):
         df['date'] = df['date'].str[:10]
         df= df.groupby('date', as_index=False).mean()
         dates = df["date"].apply(lambda x: self.date(x))
-        sentiment=df["scale"]
+        sentiment=df["scale"].apply(lambda x: round(x,3))
         # My local timezone
 
         # Get timestamp transformed to our timezone

@@ -17,9 +17,11 @@ class Main(QMainWindow):
         wid=MyWidget(data)
         wid.setMinimumWidth(600)
         graphs=QHBoxLayout()
-
         graphs.addWidget(wid)
-        self.Hlayout.addLayout(graphs,4)
+        if self.Hlayout.count()>1:
+            self.Hlayout.takeAt(1)
+        
+        self.Hlayout.addLayout(graphs)
 
 
     def __init__(self):
@@ -102,7 +104,7 @@ class Main(QMainWindow):
 
         self.date1Text = QLineEdit(self)
         self.date1Text.setInputMask("99/99/99;")
-        self.date1Text.setText("01/01/22;")
+        self.date1Text.setText("01/04/09;")
         self.date1Text.setMaximumWidth(110)
 
         self.date2Lbl = QLabel(self)
@@ -110,7 +112,7 @@ class Main(QMainWindow):
 
         self.date2Text = QLineEdit(self)
         self.date2Text.setInputMask("99/99/99;")
-        self.date2Text.setText("01/05/22;")
+        self.date2Text.setText("01/07/09;")
         self.date2Text.setMaximumWidth(95)
 
         self.filterLbl = QLabel(self, objectName="rowLbl")

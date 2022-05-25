@@ -56,11 +56,11 @@ class MyWidget(QWidget):
         self.chart_view.setSizePolicy(size)
         self.sub_layout.addWidget(self.chart_view)
         ## Right Layout
-        size.setHorizontalStretch(1)
+        size.setHorizontalStretch(3)
         self.chart_view1.setSizePolicy(size)
-        self.chart_view2.setSizePolicy(size)
+      #  self.chart_view2.setSizePolicy(size)
         self.sub_sub_layout.addWidget(self.chart_view1)
-        self.sub_sub_layout.addWidget(self.chart_view2)
+       # self.sub_sub_layout.addWidget(self.chart_view2)
 
         self.sub_layout.addLayout(self.sub_sub_layout,5)
         # Set the layout to the QWidget
@@ -122,7 +122,7 @@ class MyWidget(QWidget):
         self.slice = self.series.slices()[0]
         self.slice.setBrush(Qt.green)
         self.chart1.addSeries(self.series)
-        self.chart1.setTitle('Simple piechart example')
+        self.chart1.setTitle('Overall Sentiment')
         self.chart1.legend()
 
         self._chart_view1 = QChartView(self.chart)
@@ -159,7 +159,8 @@ class MyWidget(QWidget):
         self.series.attachAxis(self.axis_x)
         # Setting Y-axis
         self.axis_y = QValueAxis()
-        self.axis_y.setTickCount(10)
+        self.axis_y.setRange(0,5)
+        self.axis_y.setTickCount(5)
         self.axis_y.setLabelFormat("%.2f")
         self.axis_y.setTitleText("Sentiment")
         self.chart.addAxis(self.axis_y, Qt.AlignLeft)
