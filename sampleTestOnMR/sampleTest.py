@@ -24,6 +24,31 @@ def runWithModel(twitter_data, model, labelName):
     df.rename(columns= {"label" : labelName}, inplace=True) #rename the column name for different MRs label output
     return df 
 
+
+# remove consecutive duplicates from string for MR5
+def remove_consec_duplicates(str):
+    num_repeat = 0
+    new_str = ""
+    prev = ""
+    for chr in str:
+        if len(new_str) == 0:
+            new_str += chr
+            prev = cchr
+        
+        if chr == prev: # if the character has repeated itself twice
+            num_repeat += 1 # add one to the number of repeats
+
+            if num_repeat > 2:
+                continue
+        else:
+            new_s += chr
+            prev = chr
+            num_repeat = 0
+    return new_s
+
+
+print(remove_consec_duplicates("heeelloo"))
+
 # First MR, which adds a positive statement
 # Add a positive sentiment to all samples, then all previously positive samples will be checked
 def MR1(twitter_data, model):
@@ -48,6 +73,11 @@ def MR4(twitter_data, model):
     for i in twitter_data:
         i['Comments'] = i['Comments'] + " :("
     return runWithModel(twitter_data, model, "MR4_label") # return MR4 df
+
+def MR5(twitter_data, model):
+    for i in twitter_data:
+        print("hello") # remove repeating characters after 2 repeats
+    return runWithModel(twitter_data, model, "MR5_label")
 
 
 if __name__ == '__main__':
