@@ -34,16 +34,15 @@ def remove_consec_duplicates(str):
         if len(new_str) == 0:
             new_str += chr
             prev = cchr
-        
-        if chr == prev: # if the character has repeated itself twice
+        if chr == prev: # if the character has repeated itself
             num_repeat += 1 # add one to the number of repeats
 
-            if num_repeat > 2:
+            if num_repeat > 2: # if the character has repeated itself more than twice
                 continue
-        else:
-            new_s += chr
-            prev = chr
-            num_repeat = 0
+        
+        new_s += chr
+        prev = chr
+        num_repeat = 0
     return new_s
 
 
